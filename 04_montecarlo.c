@@ -32,7 +32,7 @@ int main(int argc, char** argv)
             inside++;
     }
     long int total;
-    MPI_Reduce(inside, total, 1, MPI_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(&inside, &total, 1, MPI_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
     if(rank == 0)
     {
         double ratio = total / ((float) samples * size);

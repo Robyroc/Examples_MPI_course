@@ -38,6 +38,6 @@ int main(int argc, char** argv)
         double ratio = total / ((float) samples * size);
         printf("Value of pi: %f\n", ratio * 4);
     }
-    MPI_Finalize()
+    MPI_Finalize();
     return 0;
 }

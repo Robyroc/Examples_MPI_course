@@ -14,8 +14,8 @@ int main(int argc, char** argv)
     int destination = (rank == size-1 ? 0 : rank+1);
     printf("%d/%d, sending data to %d, expecting from %d\n", rank, size, destination, source);
 
-    MPI_Send(&rank, 1, MPI_INT, destination, 0, MPI_COMM_WORLD);
     MPI_Recv(&value, 1, MPI_INT, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    MPI_Send(&rank, 1, MPI_INT, destination, 0, MPI_COMM_WORLD);
     printf("%d/%d, received %d\n", rank, size, value);
     MPI_Finalize();
     return 0;

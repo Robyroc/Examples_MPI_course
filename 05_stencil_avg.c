@@ -45,22 +45,20 @@ int main(int argc, char** argv)
         MPI_Comm_reduce(&sum, NULL, 1, MPI_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
     }
 
-    MPI_Request requests[8]; //2 for N, 2 for S, 2 for E, 2 for W
-
     for(int iteration = 0; iteration < 100; iteration++)
     {
         //Now we send the topmost row to the process above, and we receive from the one below us, and we put it inside the halo
         int source, dest;
         MPI_Cart_shift(topo, 0, -1, &source, &dest)
         printf("%d N, sending to %d, receiving from %d\n", rank, source, dest);
-        MPI_Isend(&(data[1][1]), MATRIX_LENGTH, MPI_INT, dest, 0, topo, &(requests[0]));
-        MPI_Irecv(&(data[MATRIX_LENGTH+1][1]), MATRIX_LENGTH, MPI_INT, source, 0, topo, &(requests[1]));
+        MPI_Sendrecv(&(data[1][1]), MATRIX_LENGTH, MPI_INT, dest, 0,
+                    &(data[MATRIX_LENGTH+1][1]), MATRIX_LENGTH, MPI_INT, source, 0, topo, MPI_STATUS_IGNORE);
 
         //Same for bottom row
         MPI_Cart_shift(topo, 0, 1, &source, &dest)
         printf("%d S, sending to %d, receiving from %d\n", rank, source, dest);
-        MPI_Isend(&(data[MATRIX_LENGTH][1]), MATRIX_LENGTH, MPI_INT, dest, 1, topo, &(requests[2]));
-        MPI_Irecv(&(data[0][1]), MATRIX_LENGTH, MPI_INT, source, 1, topo, &(requests[3]));
+        MPI_Sendrecv(&(data[MATRIX_LENGTH][1]), MATRIX_LENGTH, MPI_INT, dest, 1,
+                    &(data[0][1]), MATRIX_LENGTH, MPI_INT, source, 1, topo, MPI_STATUS_IGNORE);
 
         //for left and right, we must first move elements around
         int temp[2][MATRIX_LENGTH];
@@ -68,8 +66,8 @@ int main(int argc, char** argv)
             temp[0][i] = data[1][i+1];
         MPI_Cart_shift(topo, 1, -1, &source, &dest)
         printf("%d W, sending to %d, receiving from %d\n", rank, source, dest);
-        MPI_Isend(temp[0], MATRIX_LENGTH, MPI_INT, dest, 2, topo, &(requests[4]));
-        MPI_Irecv(temp[1], MATRIX_LENGTH, MPI_INT, source, 2, topo, &(requests[5]));
+        MPI_Sendrecv(temp[0], MATRIX_LENGTH, MPI_INT, dest, 2,
+                    temp[1], MATRIX_LENGTH, MPI_INT, source, 2, topo, MPI_STATUS_IGNORE);
         for(int i = 0; i < MATRIX_LENGTH; i++)
             data[MATRIX_LENGTH+1][i+1] = temp[1][i];
 
@@ -77,8 +75,8 @@ int main(int argc, char** argv)
             temp[0][i] = data[MATRIX_LENGTH][i+1];
         MPI_Cart_shift(topo, 1, 1, &source, &dest)
         printf("%d E, sending to %d, receiving from %d\n", rank, source, dest);
-        MPI_Isend(temp[0], MATRIX_LENGTH, MPI_INT, dest, 2, topo, &(requests[6]));
-        MPI_Irecv(temp[1], MATRIX_LENGTH, MPI_INT, source, 2, topo, &(requests[7]));
+        MPI_Sendrecv(temp[0], MATRIX_LENGTH, MPI_INT, dest, 2,
+                    temp[1], MATRIX_LENGTH, MPI_INT, source, 2, topo, MPI_STATUS_IGNORE);
         for(int i = 0; i < MATRIX_LENGTH; i++)
             data[0][i+1] = temp[1][i];
 

@@ -1,0 +1,1 @@
+Exercises at https://gitlab.hpc.cineca.it/training/mpi-openmp.git
